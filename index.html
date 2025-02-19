@@ -12,66 +12,64 @@
             const todoList = document.getElementById('todoList');
             const inputTodo = document.getElementById('inputTodo');
             const btnAdd = document.getElementById('btnAdd');
+            let editTarget = null; // 수정할 항목 저장
 
             let items = [];
-            
-            // 수정 : 선택된 항목을 저장할 변수
-            let selectedItem = null; 
-
-
+  
 
             // 등록
             btnAdd.addEventListener('click', function(e) {
 
                 const todoValue = inputTodo.value;
 
-                const listItem = document.createElement('li');
-                listItem.className = 'd-flex list-group-item';
-                listItem.innerText = todoValue;
-
-                const listBtn = document.createElement('button');
-                listBtn.className = 'btn-close ms-auto';
-
-                // 로컬스토리지 저장
-                items.push(inputTodo.value);
-                alert(items);
-                localStorage.setItem("items", items);
-
-                
-                // 삭제
-                listBtn.onclick = function(e) {
-                    e.stopPropagation(); // 클릭 이벤트 전파 방지
-
-                    const index = Array.from(todoList.children).indexOf(listItem);
-                    let pNode = e.target.parentNode;
-                    todoList.removeChild(pNode);
-
-
-                };
-                
-                // 항목 클릭 시 수정 준비
-                listItem.onclick = function() {
-                    inputTodo.value = todoValue; 
-                    inputTodo.focus(); 
-                    selectedItem = listItem; 
-                };
-
-                listItem.appendChild(listBtn);
-                todoList.appendChild(listItem);
-                inputTodo.value = '';
-            });
-
-            // 입력 필드에서 Enter 키로 수정
-            inputTodo.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && selectedItem) {
-                    const newValue = inputTodo.value.trim();
-                    if (newValue === '') return; // 빈 값 방지
-                    selectedItem.innerText = newValue; // 선택된 항목 수정
-                    inputTodo.value = ''; // 입력 필드 초기화
-                    selectedItem = null; // 선택된 항목 초기화
+                if (editTarget) {
+                    editTarget.firstChild.nodeValue = todoValue;
+                    editTarget = null;
+                    btnAdd.innerText = '추가';
+                }else{
+                    // 새 항목 추가
+                    const listItem = document.createElement('li');
+                    listItem.className = 'd-flex list-group-item';
+                    listItem.innerText = todoValue;
+    
+                    const listBtn = document.createElement('button');
+                    listBtn.className = 'btn-close ms-auto';
+    
+                    // 로컬스토리지 저장
+                    items.push(inputTodo.value);
+                    localStorage.setItem("items", items);
+    
+                    
+                    // 삭제, 수정
+                    listBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        todoList.removeChild(listItem);
+                        if (editTarget === listItem) {
+                            editTarget = null;
+                            btnAdd.innerText = '추가';
+                        }
+                    };
+                    
+                    // 항목 클릭 시 수정 준비
+                    listItem.onclick = function() {
+                        inputTodo.value = listItem.firstChild.nodeValue;
+                        editTarget = listItem;
+                        btnAdd.innerText = '수정';
+                    };
+    
+                    listItem.appendChild(listBtn);
+                    todoList.appendChild(listItem);
                 }
+
+                inputTodo.value = '';
+
+
+      
             });
-        });
+
+        
+
+    });
     </script>
 </head>
 <body>
